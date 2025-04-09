@@ -33,17 +33,30 @@ export function registerMcpTools(server: any): void {
         async () => {
             const url = "http://localhost:3000";
 
-            // Open browser for authentication
-            exec(`open ${url}`, (error, stdout, stderr) => {
-                if (error) {
-                    console.error(`Error opening URL: ${error.message}`);
-                    return;
-                }
-                if (stderr) {
-                    console.error(`stderr: ${stderr}`);
-                    return;
-                }
-            });
+            if (process.platform == "win32") {
+                exec(`start ${url}`, (error, stdout, stderr) => {
+                    if (error) {
+                        console.error(`Error opening URL: ${error.message}`);
+                        return;
+                    }
+                    if (stderr) {
+                        console.error(`stderr: ${stderr}`);
+                        return;
+                    }
+                });
+            } else if (process.platform == "darwin") {
+                exec(`open ${url}`, (error, stdout, stderr) => {
+                    if (error) {
+                        console.error(`Error opening URL: ${error.message}`);
+                        return;
+                    }
+                    if (stderr) {
+                        console.error(`stderr: ${stderr}`);
+                        return;
+                    }
+                });
+            }
+
 
             // Wait for authentication to complete
             const now = new Date();
@@ -95,9 +108,6 @@ export function registerMcpTools(server: any): void {
             }
 
             const identity = await identityStore.getIdentity();
-
-            console.log(identity.getPrincipal().toString());
-
 
             return {
                 content: [
