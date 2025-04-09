@@ -1,13 +1,18 @@
 import { startExpressServer } from "./server/express.js";
 import { startMcpServer } from "./mcp/server.js";
 
+import dotenv from "dotenv";
+
+dotenv.config({ path: "..\\.env" });
+
+
 /**
  * Main function to start all services
  */
 async function main() {
   try {
     // Start the Express server
-    startExpressServer(9000);
+    startExpressServer(9999);
 
     // Start the MCP server
     await startMcpServer();

@@ -35,7 +35,7 @@ export const Page = () => {
 
                 // Send delegation to backend
                 try {
-                    const response = await fetch('http://localhost:9000/identity', {
+                    const response = await fetch('http://localhost:9999/identity', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',

@@ -1,7 +1,8 @@
 import express from "express";
 import { Request, Response } from "express-serve-static-core";
 import cors from "cors";
-import { getDelegatedIdentity } from "./identity.js";
+import { getDelegatedIdentity } from "../service/identity.js";
+import { WhoamiService } from "../service/whoiam.js";
 
 // Create a singleton to store identity across the application
 export class IdentityStore {
@@ -64,6 +65,23 @@ export function startExpressServer(port: number = 8888): void {
 
 
         res.json(delegateIdentity.getPrincipal().toString());
+    });
+
+    app.get("/test", async (req: Request, res: Response) => {
+        const delegationChain = await identityStore.getDelegationChain();
+
+        if (!delegationChain) {
+            res.status(400).json({ error: "No delegation chain found" });
+            return;
+        }
+
+        const delegateIdentity = await getDelegatedIdentity(delegationChain);
+
+        const whoami = new WhoamiService(delegateIdentity);
+
+        const greet = await whoami.greet();
+
+        res.json(greet);
     });
 
     app.post("/identity", async (req: Request, res: Response) => {

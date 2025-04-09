@@ -1,10 +1,8 @@
-import { DelegationChain, DelegationIdentity } from "@dfinity/identity";
 import { Secp256k1KeyIdentity } from "@dfinity/identity-secp256k1";
-import { toBase64 } from "@slide-computer/signer";
 import * as bip39 from "bip39";
 import dotenv from "dotenv";
 
-dotenv.config({path: "..\\.env"});
+dotenv.config({ path: "..\\.env" });
 
 /**
  * Generates a random principal using BIP39 mnemonic
