@@ -1,9 +1,10 @@
 import { startExpressServer } from "./server/express.js";
 import { startMcpServer } from "./mcp/server.js";
+import { fileURLToPath } from 'url';
+import { dirname, join } from 'path';
 
 import dotenv from "dotenv";
-
-dotenv.config({ path: "..\\.env" });
+dotenv.config({path: join(dirname(fileURLToPath(import.meta.url)), "..", ".env") });
 
 
 /**

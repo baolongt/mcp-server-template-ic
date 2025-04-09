@@ -1,8 +1,5 @@
 import { Secp256k1KeyIdentity } from "@dfinity/identity-secp256k1";
 import * as bip39 from "bip39";
-import dotenv from "dotenv";
-
-dotenv.config({ path: "..\\.env" });
 
 /**
  * Generates a random principal using BIP39 mnemonic
