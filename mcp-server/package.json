@@ -1,0 +1,48 @@
+{
+  "type": "module",
+  "bin": {
+    "weather": "./build/index.js"
+  },
+  "scripts": {
+    "build": "tsc && chmod 755 build/index.js",
+    "dev:server": "npx tsx src/server/express.ts",
+    "inspect": "npm run build && npx @modelcontextprotocol/inspector node build/index.js"
+  },
+  "files": [
+    "build"
+  ],
+  "name": "test-authen-flow",
+  "version": "1.0.0",
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@dfinity/agent": "^2.4.0",
+    "@dfinity/auth-client": "^2.4.0",
+    "@dfinity/candid": "^2.4.0",
+    "@dfinity/identity": "^2.4.0",
+    "@dfinity/identity-secp256k1": "^2.4.0",
+    "@dfinity/ledger-icp": "^2.6.11",
+    "@dfinity/principal": "^2.4.0",
+    "@dfinity/use-auth-client": "^2.4.0",
+    "@dfinity/utils": "^2.11.0",
+    "@modelcontextprotocol/sdk": "^1.8.0",
+    "@slide-computer/signer": "^3.16.0",
+    "bip39": "^3.1.0",
+    "cors": "^2.8.5",
+    "crypto": "^1.0.1",
+    "dotenv": "^16.4.7",
+    "express": "^5.1.0",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.19.3",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.1",
+    "@types/node": "^22.14.0",
+    "typescript": "^5.8.3"
+  }
+}
