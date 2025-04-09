@@ -1,5 +1,27 @@
-import { exec } from "child_process";
 import { IdentityStore } from "../server/express.js";
+import { UrlService } from "../service/url.js";
+
+/**
+ * Authentication guard that checks if the user is authenticated before proceeding
+ * @param callback The callback function to execute if authenticated
+ * @returns A function that returns an error message if not authenticated, or executes the callback if authenticated
+ */
+const withAuthentication = (callback: Function) => async (...args: any[]) => {
+    const identityStore = IdentityStore.getInstance();
+
+    if (!identityStore.isAuthenticated()) {
+        return {
+            content: [
+                {
+                    type: "text",
+                    text: "Not authenticated. Please use the 'authenticate' tool first.",
+                },
+            ],
+        };
+    }
+
+    return callback(...args);
+};
 
 /**
  * Registers all MCP tools for the authentication flow
@@ -31,32 +53,19 @@ export function registerMcpTools(server: any): void {
         "Authenticate the server. This action will open a browser window to authenticate the server",
         {},
         async () => {
-            const url = "http://localhost:3000";
+            // Use the UrlService to open the authentication URL with default values
+            const success = UrlService.openAuthenticationUrl();
 
-            if (process.platform == "win32") {
-                exec(`start ${url}`, (error, stdout, stderr) => {
-                    if (error) {
-                        console.error(`Error opening URL: ${error.message}`);
-                        return;
-                    }
-                    if (stderr) {
-                        console.error(`stderr: ${stderr}`);
-                        return;
-                    }
-                });
-            } else if (process.platform == "darwin") {
-                exec(`open ${url}`, (error, stdout, stderr) => {
-                    if (error) {
-                        console.error(`Error opening URL: ${error.message}`);
-                        return;
-                    }
-                    if (stderr) {
-                        console.error(`stderr: ${stderr}`);
-                        return;
-                    }
-                });
+            if (!success) {
+                return {
+                    content: [
+                        {
+                            type: "text",
+                            text: `Failed to open authentication URL`,
+                        },
+                    ],
+                };
             }
-
 
             // Wait for authentication to complete
             const now = new Date();
@@ -90,25 +99,13 @@ export function registerMcpTools(server: any): void {
         }
     );
 
-    // List proposals tool
+    // Get wallet address tool (protected)
     server.tool(
         "get-wallet-address",
         "Get the wallet address connected to the server",
         {},
-        async () => {
-            if (!identityStore.isAuthenticated()) {
-                return {
-                    content: [
-                        {
-                            type: "text",
-                            text: `Server is not authenticated`,
-                        },
-                    ],
-                };
-            }
-
+        withAuthentication(async () => {
             const identity = await identityStore.getIdentity();
-
             return {
                 content: [
                     {
@@ -117,6 +114,6 @@ export function registerMcpTools(server: any): void {
                     },
                 ],
             };
-        }
+        })
     );
 }

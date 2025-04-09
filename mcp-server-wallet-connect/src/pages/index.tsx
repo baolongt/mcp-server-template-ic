@@ -1,8 +1,8 @@
 import { DelegationChain, DelegationIdentity } from "@dfinity/identity";
 import { useIdentity } from "@nfid/identitykit/react";
 import { fromBase64 } from "@slide-computer/signer";
-import { useEffect } from "react";
-import { BACKEND_PUBKEY, DELEGATE_EXPIRATION } from "../constant";
+import { useEffect, useState } from "react";
+import { BACKEND_PUBKEY, DELEGATE_EXPIRATION, BACKEND_URL } from "../constant";
 import { ConnectWallet } from "@nfid/identitykit/react"
 
 function isDelegationIdentity(identity: any): identity is DelegationIdentity {
@@ -11,6 +11,7 @@ function isDelegationIdentity(identity: any): identity is DelegationIdentity {
 
 export const Page = () => {
     const identity = useIdentity();
+    const [delegationStatus, setDelegationStatus] = useState<string>("");
 
     useEffect(() => {
         if (identity) {
@@ -19,23 +20,28 @@ export const Page = () => {
             const delegateToBackend = async () => {
                 if (!isDelegationIdentity(identity)) {
                     console.error('Identity is not a DelegationIdentity');
+                    setDelegationStatus("Error: Identity is not a DelegationIdentity");
                     return;
                 }
 
-                const delegation = await DelegationChain.create(
-                    identity, // No need for casting now
-                    { toDer: () => fromBase64(BACKEND_PUBKEY) },
-                    new Date(Date.now() + DELEGATE_EXPIRATION),
-                    {
-                        previous: identity.getDelegation(),
-                    },
-                );
+                console.log('BACKEND_PUBKEY:', BACKEND_PUBKEY);
+                console.log('DELEGATE_EXPIRATION:', DELEGATE_EXPIRATION);
 
-                console.log('Delegation:', JSON.stringify(delegation.toJSON()));
-
-                // Send delegation to backend
                 try {
-                    const response = await fetch('http://localhost:9999/identity', {
+                    const delegation = await DelegationChain.create(
+                        identity,
+                        { toDer: () => fromBase64(BACKEND_PUBKEY) },
+                        new Date(Date.now() + DELEGATE_EXPIRATION),
+                        {
+                            previous: identity.getDelegation(),
+                        },
+                    );
+
+                    console.log('Delegation:', JSON.stringify(delegation.toJSON()));
+                    setDelegationStatus("Delegation created successfully. Sending to backend...");
+
+                    // Send delegation to backend using the configured URL
+                    const response = await fetch(BACKEND_URL+"/identity", {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
@@ -48,8 +54,10 @@ export const Page = () => {
                     }
 
                     console.log('Delegation successfully sent to backend');
+                    setDelegationStatus("Delegation successfully sent to backend");
                 } catch (error) {
-                    console.error('Error sending delegation to backend:', error);
+                    console.error('Error with delegation process:', error);
+                    setDelegationStatus(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`);
                 }
             };
 
@@ -77,9 +85,22 @@ export const Page = () => {
             }}>
                 <ConnectWallet />
                 {identity && (
-                    <p style={{ marginTop: '20px', wordBreak: 'break-all' }}>
-                        My principal: {identity.getPrincipal().toText()}
-                    </p>
+                    <div>
+                        <p style={{ marginTop: '20px', wordBreak: 'break-all' }}>
+                            My principal: {identity.getPrincipal().toText()}
+                        </p>
+                        {delegationStatus && (
+                            <p style={{ 
+                                marginTop: '10px',
+                                padding: '10px', 
+                                borderRadius: '5px',
+                                backgroundColor: delegationStatus.includes('Error') ? '#ffeeee' : '#eeffee',
+                                color: delegationStatus.includes('Error') ? '#cc0000' : '#007700'
+                            }}>
+                                {delegationStatus}
+                            </p>
+                        )}
+                    </div>
                 )}
             </div>
         </div>
