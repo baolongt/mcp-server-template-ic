@@ -1,5 +1,7 @@
 import { IdentityStore } from "../server/express.js";
 import { UrlService } from "../service/url.js";
+import { WhoamiService } from "../service/whoiam.js";
+
 
 /**
  * Authentication guard that checks if the user is authenticated before proceeding
@@ -111,6 +113,23 @@ export function registerMcpTools(server: any): void {
                     {
                         type: "text",
                         text: `User principal id ${identity.getPrincipal().toString()}`,
+                    },
+                ],
+            };
+        })
+    );
+
+    // Greet whoami canister
+    server.tool(
+        "greet-whoami-canister",
+        "Send a greet call to whoami canister",
+        {},
+        withAuthentication(async () => {
+            return {
+                content: [
+                    {
+                        type: "text",
+                        text: `Response from whoami canister: ${await (new WhoamiService(await identityStore.getIdentity())).greet()}`,
                     },
                 ],
             };

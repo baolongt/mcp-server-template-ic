@@ -31,7 +31,6 @@ export class UrlService {
     ): boolean {
         // Construct URL with query parameters
         const url = `${this.BASE_URL}?pubkey=${encodeURIComponent(pubkey)}&expiration=${expiration}`;
-        console.log(`Opening authentication URL: ${url}`);
 
         try {
             // Open URL based on platform
